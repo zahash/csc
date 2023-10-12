@@ -190,13 +190,20 @@ impl<'text> From<ParseError> for EvalError<'text> {
 mod tests {
 
     use super::*;
+    use pretty_assertions::assert_eq;
+
+    macro_rules! check {
+        ($state:expr, $src:expr, $expected:expr) => {
+            let res = eval($src, &mut $state).expect(&format!("unable to eval {}", $src));
+            assert_eq!(res, $expected);
+        };
+    }
 
     #[test]
     fn test_eval() {
         let mut state = State::new();
 
-        let result = eval("a = 2^(1/2)", &mut state).unwrap();
-        println!("{}", result);
-        println!("{:?}", state);
+        check!(&mut state, "a = 2 + 3", 5.);
+        check!(&mut state, "a", 5.);
     }
 }

@@ -2,8 +2,17 @@ use crate::eval::*;
 
 use rustyline::error::ReadlineError;
 
+const LOGO: &'static str = r#"
+███████  ██████ ██      ██████  █████  ██       ██████ 
+██      ██      ██     ██      ██   ██ ██      ██      
+███████ ██      ██     ██      ███████ ██      ██      
+     ██ ██      ██     ██      ██   ██ ██      ██      
+███████  ██████ ██      ██████ ██   ██ ███████  ██████ 
+"#;
+
 pub fn run() {
-    println!("***** Scientific Calcualtor *****");
+    println!("{}", LOGO);
+    println!(env!("CARGO_PKG_VERSION"));
 
     let mut state = State::new();
     let mut rl = rustyline::DefaultEditor::new().unwrap();
