@@ -1,0 +1,22 @@
+https://opensource.axo.dev/cargo-dist/book/way-too-quickstart.html
+
+cargo dist init --yes
+
+# <manually update the version of your crate, run tests, etc>
+
+# commit and push to main (can be done with a PR)
+git commit -am "release: version 0.1.0"
+git push
+
+# actually push the tag up (this triggers cargo-dist's CI)
+git tag v0.1.0
+git push --tags
+
+# publish to crates.io (optional)
+cargo publish
+
+
+
+TODO:
+history
+is =
