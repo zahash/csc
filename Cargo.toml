@@ -1,9 +1,11 @@
 [package]
-name = "sc"
+name = "csc"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Zahash <zahash.z@gmail.com>"]
+description = "Command Line Scientific Calculator"
+license = "MIT"
+repository = "https://github.com/zahash/csc"
 
 [dependencies]
 regex = { version = "1" }

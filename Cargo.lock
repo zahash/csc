@@ -41,6 +41,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "csc"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "pretty_assertions",
+ "regex",
+ "rustyline",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -225,16 +235,6 @@ dependencies = [
  "unicode-width",
  "utf8parse",
  "winapi",
-]
-
-[[package]]
-name = "sc"
-version = "0.1.0"
-dependencies = [
- "lazy_static",
- "pretty_assertions",
- "regex",
- "rustyline",
 ]
 
 [[package]]
