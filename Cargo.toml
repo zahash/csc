@@ -1,6 +1,6 @@
 [package]
 name = "csc"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Zahash <zahash.z@gmail.com>"]
 description = "Command Line Scientific Calculator"
@@ -10,6 +10,7 @@ repository = "https://github.com/zahash/csc"
 [dependencies]
 regex = { version = "1" }
 lazy_static = { version = "1" }
+clap = { version = "4", features = ["derive"] }
 rustyline = { version = "12" }
 
 [dev-dependencies]
