@@ -1,6 +1,5 @@
 use crate::eval::*;
 
-use clap::Parser;
 use rustyline::error::ReadlineError;
 
 const LOGO: &'static str = r#"
@@ -11,16 +10,9 @@ const LOGO: &'static str = r#"
  ██████ ███████  ██████
 "#;
 
-/// CSC
-#[derive(Parser)]
-struct Cli {
-    /// run one off computations instead of launching the prompt
-    expr: Option<Vec<String>>,
-}
-
 pub fn run() {
-    if let Some(expr) = Cli::parse().expr {
-        let expr = expr.join(" ");
+    let expr = std::env::args().skip(1).collect::<Vec<String>>().join(" ");
+    if !expr.trim().is_empty() {
         match eval(expr.as_str(), &mut State::new()) {
             Ok(res) => println!("{}", res),
             Err(e) => eprintln!("{:?}", e),

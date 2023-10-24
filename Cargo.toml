@@ -10,7 +10,6 @@ repository = "https://github.com/zahash/csc"
 [dependencies]
 regex = { version = "1" }
 lazy_static = { version = "1" }
-clap = { version = "4", features = ["derive"] }
 rustyline = { version = "12" }
 
 [dev-dependencies]
