@@ -82,6 +82,12 @@ acosh(rad)
 atanh(rad)
 ```
 
+All calculations are done using [64 bit *binary* floating point arithmetic](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)
+(using the Rust type [`f64`](https://doc.rust-lang.org/std/primitive.f64.html)), so you can come across
+the limitations of this implementation, and observe behavior that may be different from other “scientific calculators”, such as the following:
+* Rounding errors that may be surprising in decimal notation (e.g. evaluating `0.1 + 0.2` prints `0.30000000000000004`).
+* Special values such as “infinity”, “not a number” or a negative zero can be the result of calculations that overflow or have invalid arguments.
+
 ## Meta
 
 M. Zahash – zahash.z@gmail.com
