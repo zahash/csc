@@ -36,7 +36,13 @@ b = a + 1.14
 c = log(b, 3) + sin(PI)
 ```
 
-or run one off computations by simply providing them `csc 10 + 1.14 * ln(50)`
+or run one off computations by simply providing them
+
+```sh
+$ csc 10 + 1.14
+$ csc '10 + 1.14 * ln(50)'
+```
+
 
 ## Meta
 
