@@ -43,6 +43,44 @@ $ csc 10 + 1.14
 $ csc '10 + 1.14 * ln(50)'
 ```
 
+## Features
+
+```sh
+# basic arithmetic and assignment
+a = 1
+b = -2 % a * (3^2 / 4)
+b += 100
+
+# functions
+exp(x)
+sqrt(x)
+cbrt(x)
+abs(x)
+floor(x)
+ceil(x)
+round(x)
+
+ln(x)
+log2(x)
+log10(x)
+log(x, b)
+
+sin(rad)
+cos(rad)
+tan(rad)
+
+sinh(rad)
+cosh(rad)
+tanh(rad)
+
+asin(rad)
+acos(rad)
+atan(rad)
+
+asinh(rad)
+acosh(rad)
+atanh(rad)
+```
 
 ## Meta
 
