@@ -1,5 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
+use chainchomp::ctx_free::many_delimited;
+
 use crate::lex::Token;
 
 #[derive(Debug)]
@@ -206,12 +208,8 @@ fn parse_postfix_expr<'text>(
 ) -> Result<(PostfixExpr<'text>, usize), ParseError> {
     if let Some(Token::Ident(name)) = tokens.get(pos) {
         if let Some(Token::Symbol("(")) = tokens.get(pos + 1) {
-            let (args, pos) = many(
-                tokens,
-                pos + 2,
-                parse_assignment_expr,
-                Some(Token::Symbol(",")),
-            );
+            let (args, pos) =
+                many_delimited(tokens, pos + 2, parse_assignment_expr, &Token::Symbol(","));
 
             let Some(Token::Symbol(")")) = tokens.get(pos) else {
                 return Err(ParseError::Expected(Token::Symbol(")"), pos));
@@ -251,31 +249,6 @@ fn parse_primary_expr<'text>(
             "parse_primary_expr: expected <identifier> or `int` or `char` or `float` or `string` or ( <expression> ) ",
         )),
     }
-}
-
-fn many<'text, Ast>(
-    tokens: &[Token<'text>],
-    mut pos: usize,
-    parser: impl Fn(&[Token<'text>], usize) -> Result<(Ast, usize), ParseError>,
-    delimiter: Option<Token>,
-) -> (Vec<Ast>, usize) {
-    let mut list = vec![];
-
-    while let Ok((ast, next_pos)) = parser(tokens, pos) {
-        list.push(ast);
-        pos = next_pos;
-
-        if let Some(delimiter) = &delimiter {
-            match tokens.get(pos) {
-                Some(token) if token == delimiter => {
-                    pos += 1;
-                }
-                _ => break,
-            };
-        }
-    }
-
-    (list, pos)
 }
 
 impl<'text> Display for AssignmentExpr<'text> {

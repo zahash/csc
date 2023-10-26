@@ -30,6 +30,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "chainchomp"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d2a1245e6c4de8678a7db17ee514a9781876a53a8fb800e6424664bf8b23595"
+
+[[package]]
 name = "clipboard-win"
 version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -44,6 +50,7 @@ dependencies = [
 name = "csc"
 version = "0.1.4"
 dependencies = [
+ "chainchomp",
  "lazy_static",
  "pretty_assertions",
  "regex",
