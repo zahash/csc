@@ -28,11 +28,15 @@ cargo install csc
 
 ## Usage examples
 
+launch the interactive prompt by typing `csc` to run multiple computations
+
 ```sh
 a = 10
 b = a + 1.14
 c = log(b, 3) + sin(PI)
 ```
+
+or run one off computations by simply providing them `csc 10 + 1.14 * ln(50)`
 
 ## Meta
 
