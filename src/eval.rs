@@ -173,15 +173,19 @@ impl<'text> Eval<'text> for PostfixExpr<'text> {
                 ("cot", [rad]) => Ok(rad.eval(state)?.tan().recip()),
                 ("coth", [rad]) => Ok(rad.eval(state)?.tanh().recip()),
                 ("acot", [rad]) => Ok(std::f64::consts::FRAC_PI_2 - rad.eval(state)?.atan()),
-                ("acoth", [rad]) => Ok(0.5 * ( 2.0 /(rad.eval(state)? - 1.0)).ln_1p()),
+                ("acoth", [rad]) => Ok(0.5 * (2.0 / (rad.eval(state)? - 1.0)).ln_1p()),
                 ("sec", [rad]) => Ok(rad.eval(state)?.cos().recip()),
                 ("sech", [rad]) => Ok(rad.eval(state)?.cosh().recip()),
                 ("asec", [rad]) => Ok((rad.eval(state)?.recip()).acos()),
-                ("asech", [rad]) => Ok((rad.eval(state)?.recip() + ((rad.eval(state)?).powi(-2) - 1.0_f64).sqrt()).ln()),
+                ("asech", [rad]) => {
+                    Ok((rad.eval(state)?.recip() + (rad.eval(state)?.powi(-2) - 1.0).sqrt()).ln())
+                }
                 ("csc", [rad]) => Ok(rad.eval(state)?.sin().recip()),
                 ("csch", [rad]) => Ok(rad.eval(state)?.sinh().recip()),
                 ("acsc", [rad]) => Ok((rad.eval(state)?.recip()).asin()),
-                ("acsch", [rad]) => Ok((rad.eval(state)?.recip() + ((rad.eval(state)?).powi(-2) + 1.0_f64).sqrt()).ln()),
+                ("acsch", [rad]) => {
+                    Ok((rad.eval(state)?.recip() + (rad.eval(state)?.powi(-2) + 1.0).sqrt()).ln())
+                }
                 _ => Err(EvalError::InvalidFnCall(format!("{}", self))),
             },
         }
