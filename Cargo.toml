@@ -1,6 +1,6 @@
 [package]
 name = "csc"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Zahash <zahash.z@gmail.com>"]
 description = "Command Line Scientific Calculator"
@@ -11,8 +11,8 @@ repository = "https://github.com/zahash/csc"
 anyhow = "1"
 regex = { version = "1" }
 lazy_static = { version = "1" }
-rustyline = { version = "12" }
-chainchomp = { version = "0.1" }
+rustyline = { version = "14" }
+chainchomp = { version = "0.2.1" }
 
 [dev-dependencies]
 pretty_assertions = { version = "1" }

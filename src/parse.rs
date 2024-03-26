@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use chainchomp::ctx_free::many_delimited;
+use chainchomp::many_delimited;
 
 use crate::lex::Token;
 
@@ -12,7 +12,7 @@ pub enum ParseError {
 }
 
 pub fn parse<'text>(tokens: &[Token<'text>]) -> Result<Expr<'text>, ParseError> {
-    let (expr, pos) = parse_expr(&tokens, 0)?;
+    let (expr, pos) = parse_expr(&tokens, 0, &mut ())?;
     match pos < tokens.len() {
         true => Err(ParseError::IncompleteParse(pos).into()),
         false => Ok(expr),
@@ -24,8 +24,9 @@ pub type Expr<'text> = AssignmentExpr<'text>;
 fn parse_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(Expr<'text>, usize), ParseError> {
-    parse_assignment_expr(tokens, pos)
+    parse_assignment_expr(tokens, pos, ctx)
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -42,42 +43,43 @@ pub enum AssignmentExpr<'text> {
 fn parse_assignment_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(AssignmentExpr<'text>, usize), ParseError> {
     if let Some(Token::Ident(ident)) = tokens.get(pos) {
         if let Some(op) = tokens.get(pos + 1) {
             if op == &Token::Symbol("=") {
-                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2)?;
+                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2, ctx)?;
                 return Ok((AssignmentExpr::Assign(ident, Box::new(rhs)), pos));
             }
 
             if op == &Token::Symbol("*=") {
-                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2)?;
+                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2, ctx)?;
                 return Ok((AssignmentExpr::MulAssign(ident, Box::new(rhs)), pos));
             }
 
             if op == &Token::Symbol("/=") {
-                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2)?;
+                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2, ctx)?;
                 return Ok((AssignmentExpr::DivAssign(ident, Box::new(rhs)), pos));
             }
 
             if op == &Token::Symbol("%=") {
-                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2)?;
+                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2, ctx)?;
                 return Ok((AssignmentExpr::ModAssign(ident, Box::new(rhs)), pos));
             }
 
             if op == &Token::Symbol("+=") {
-                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2)?;
+                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2, ctx)?;
                 return Ok((AssignmentExpr::AddAssign(ident, Box::new(rhs)), pos));
             }
 
             if op == &Token::Symbol("-=") {
-                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2)?;
+                let (rhs, pos) = parse_assignment_expr(tokens, pos + 2, ctx)?;
                 return Ok((AssignmentExpr::SubAssign(ident, Box::new(rhs)), pos));
             }
         }
     }
 
-    let (expr, pos) = parse_additive_expr(tokens, pos)?;
+    let (expr, pos) = parse_additive_expr(tokens, pos, ctx)?;
     Ok((expr.into(), pos))
 }
 
@@ -91,18 +93,19 @@ pub enum AdditiveExpr<'text> {
 fn parse_additive_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(AdditiveExpr<'text>, usize), ParseError> {
-    let (lhs, mut pos) = parse_multiplicative_expr(tokens, pos)?;
+    let (lhs, mut pos) = parse_multiplicative_expr(tokens, pos, ctx)?;
     let mut lhs = lhs.into();
     while let Some(token) = tokens.get(pos) {
         match token {
             Token::Symbol("+") => {
-                let (rhs, next_pos) = parse_multiplicative_expr(tokens, pos + 1)?;
+                let (rhs, next_pos) = parse_multiplicative_expr(tokens, pos + 1, ctx)?;
                 pos = next_pos;
                 lhs = AdditiveExpr::Add(Box::new(lhs), rhs);
             }
             Token::Symbol("-") => {
-                let (rhs, next_pos) = parse_multiplicative_expr(tokens, pos + 1)?;
+                let (rhs, next_pos) = parse_multiplicative_expr(tokens, pos + 1, ctx)?;
                 pos = next_pos;
                 lhs = AdditiveExpr::Sub(Box::new(lhs), rhs);
             }
@@ -123,23 +126,24 @@ pub enum MultiplicativeExpr<'text> {
 fn parse_multiplicative_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(MultiplicativeExpr<'text>, usize), ParseError> {
-    let (lhs, mut pos) = parse_exponential_expr(tokens, pos)?;
+    let (lhs, mut pos) = parse_exponential_expr(tokens, pos, ctx)?;
     let mut lhs = lhs.into();
     while let Some(token) = tokens.get(pos) {
         match token {
             Token::Symbol("*") => {
-                let (rhs, next_pos) = parse_exponential_expr(tokens, pos + 1)?;
+                let (rhs, next_pos) = parse_exponential_expr(tokens, pos + 1, ctx)?;
                 pos = next_pos;
                 lhs = MultiplicativeExpr::Mul(Box::new(lhs), rhs);
             }
             Token::Symbol("/") => {
-                let (rhs, next_pos) = parse_exponential_expr(tokens, pos + 1)?;
+                let (rhs, next_pos) = parse_exponential_expr(tokens, pos + 1, ctx)?;
                 pos = next_pos;
                 lhs = MultiplicativeExpr::Div(Box::new(lhs), rhs);
             }
             Token::Symbol("%") => {
-                let (rhs, next_pos) = parse_exponential_expr(tokens, pos + 1)?;
+                let (rhs, next_pos) = parse_exponential_expr(tokens, pos + 1, ctx)?;
                 pos = next_pos;
                 lhs = MultiplicativeExpr::Mod(Box::new(lhs), rhs);
             }
@@ -158,11 +162,12 @@ pub enum ExponentialExpr<'ident> {
 fn parse_exponential_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(ExponentialExpr<'text>, usize), ParseError> {
-    let (lhs, pos) = parse_unary_expr(tokens, pos)?;
+    let (lhs, pos) = parse_unary_expr(tokens, pos, ctx)?;
     if let Some(token) = tokens.get(pos) {
         if token == &Token::Symbol("^") {
-            let (rhs, pos) = parse_exponential_expr(tokens, pos + 1)?;
+            let (rhs, pos) = parse_exponential_expr(tokens, pos + 1, ctx)?;
             return Ok((ExponentialExpr::Pow(lhs, Box::new(rhs)), pos));
         }
     }
@@ -179,18 +184,19 @@ pub enum UnaryExpr<'text> {
 fn parse_unary_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(UnaryExpr<'text>, usize), ParseError> {
     match tokens.get(pos) {
         Some(Token::Symbol("+")) => {
-            let (expr, pos) = parse_unary_expr(tokens, pos + 1)?;
+            let (expr, pos) = parse_unary_expr(tokens, pos + 1, ctx)?;
             Ok((UnaryExpr::UnaryAdd(Box::new(expr)), pos))
         }
         Some(Token::Symbol("-")) => {
-            let (expr, pos) = parse_unary_expr(tokens, pos + 1)?;
+            let (expr, pos) = parse_unary_expr(tokens, pos + 1, ctx)?;
             Ok((UnaryExpr::UnarySub(Box::new(expr)), pos))
         }
         _ => {
-            let (expr, pos) = parse_postfix_expr(tokens, pos)?;
+            let (expr, pos) = parse_postfix_expr(tokens, pos, ctx)?;
             Ok((expr.into(), pos))
         }
     }
@@ -205,11 +211,17 @@ pub enum PostfixExpr<'text> {
 fn parse_postfix_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(PostfixExpr<'text>, usize), ParseError> {
     if let Some(Token::Ident(name)) = tokens.get(pos) {
         if let Some(Token::Symbol("(")) = tokens.get(pos + 1) {
-            let (args, pos) =
-                many_delimited(tokens, pos + 2, parse_assignment_expr, &Token::Symbol(","));
+            let (args, pos) = many_delimited(
+                tokens,
+                pos + 2,
+                ctx,
+                parse_assignment_expr,
+                &Token::Symbol(","),
+            );
 
             let Some(Token::Symbol(")")) = tokens.get(pos) else {
                 return Err(ParseError::Expected(Token::Symbol(")"), pos));
@@ -219,7 +231,7 @@ fn parse_postfix_expr<'text>(
         }
     }
 
-    let (expr, pos) = parse_primary_expr(tokens, pos)?;
+    let (expr, pos) = parse_primary_expr(tokens, pos, ctx)?;
     Ok((expr.into(), pos))
 }
 
@@ -233,12 +245,13 @@ pub enum Primary<'text> {
 fn parse_primary_expr<'text>(
     tokens: &[Token<'text>],
     pos: usize,
+    ctx: &mut (),
 ) -> Result<(Primary<'text>, usize), ParseError> {
     match tokens.get(pos) {
         Some(Token::Ident(ident)) => Ok((Primary::Ident(ident), pos + 1)),
         Some(Token::Decimal(n)) => Ok((Primary::Float(*n), pos + 1)),
         Some(Token::Symbol("(")) => {
-            let (expr, pos) = parse_expr(tokens, pos + 1, )?;
+            let (expr, pos) = parse_expr(tokens, pos + 1, ctx)?;
             match tokens.get(pos) {
                 Some(Token::Symbol(")")) => Ok((Primary::Parens(Box::new(expr)), pos + 1)),
                 _ => Err(ParseError::Expected(Token::Symbol(")"), pos)),
@@ -399,7 +412,7 @@ mod tests {
     macro_rules! check {
         ($f:ident, $src:expr, $expected:expr) => {
             let tokens = lex($src).expect("** LEX ERROR");
-            let (stmt, pos) = $f(&tokens, 0).expect("** Unable to parse statement");
+            let (stmt, pos) = $f(&tokens, 0, &mut ()).expect("** Unable to parse statement");
             assert_eq!(pos, tokens.len(), "** Unable to parse all Tokens\n{}", stmt);
             let stmt = format!("{}", stmt);
             assert_eq!($expected, stmt);
