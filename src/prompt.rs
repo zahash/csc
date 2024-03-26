@@ -10,30 +10,34 @@ const LOGO: &'static str = r#"
  ██████ ███████  ██████
 "#;
 
-pub fn run() {
+pub fn run() -> anyhow::Result<()> {
     let expr = std::env::args().skip(1).collect::<Vec<String>>().join(" ");
     if !expr.trim().is_empty() {
         match eval(expr.as_str(), &mut State::new()) {
             Ok(res) => println!("{}", res),
             Err(e) => eprintln!("{:?}", e),
         }
-        return;
+        return Ok(());
     }
 
     println!("{}", LOGO);
     println!(env!("CARGO_PKG_VERSION"));
 
+    println!("To Quit, press CTRL-C or CTRL-D or type 'exit' or 'quit'");
+
     let mut state = State::new();
-    let mut rl = rustyline::DefaultEditor::new().unwrap();
+    let mut editor = rustyline::DefaultEditor::new().unwrap();
 
     loop {
-        match rl.readline("> ") {
+        match editor.readline("> ").as_deref() {
+            Ok("clear") | Ok("cls") => editor.clear_screen()?,
+            Ok("exit") | Ok("quit") => break,
             Ok(line) => {
                 if !line.is_empty() {
-                    let _ = rl.add_history_entry(line.as_str());
-                    match eval(line.as_str(), &mut state) {
-                        Ok(res) => println!("{}", res),
-                        Err(e) => eprintln!("{:?}", e),
+                    let _ = editor.add_history_entry(line);
+                    match eval(line, &mut state) {
+                        Ok(res) => println!(">>> {}", res),
+                        Err(e) => eprintln!("!! {:?}", e),
                     }
                 }
             }
@@ -51,4 +55,6 @@ pub fn run() {
             }
         }
     }
+
+    Ok(())
 }

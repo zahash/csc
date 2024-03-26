@@ -3,6 +3,6 @@ mod lex;
 mod parse;
 mod prompt;
 
-fn main() {
-    prompt::run();
+fn main() -> anyhow::Result<()> {
+    prompt::run()
 }
